@@ -1,51 +1,37 @@
-version: 2.1
-executors:
-  ios-executor:
-    docker:
-      - image: circleci/python:3.8
-    working_directory: ~/project
-
-jobs:
-  build:
-    executor: ios-executor
-    steps:
-      - checkout
-      - run:
-          name: Decode certificate.p12
-          command: echo $CERTIFICATE_P12 | base64 --decode > certificate.p12
-      - run:
-          name: Decode private_key.key
-          command: echo $PRIVATE_KEY | base64 --decode > private_key.key
-      - run:
-          name: Setup Keychain
-          command: |
-            # Создайте новый Keychain
-            security create-keychain -p "keychain_password" build.keychain
-            security default-keychain -s build.keychain
-            security unlock-keychain -p "keychain_password" build.keychain
-
-            # Добавьте сертификат и ключ в Keychain
-            security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "certificate_password" -A
-            security import private_key.key -k ~/Library/Keychains/build.keychain -P "private_key_password" -A
-
-            # Настройте Keychain
-            security list-keychains -d user -s ~/Library/Keychains/build.keychain
-            security set-keychain-settings -t 3600 -l ~/Library/Keychains/build.keychain
-      - run:
-          name: Install dependencies
-          command: |
-            gem install cocoapods
-            pod install
-      - run:
-          name: Build iOS App
-          command: |
-            xcodebuild -workspace Pyto.xcworkspace -scheme Pyto -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $CM_BUILD_DIR/Pyto.xcarchive
-            xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/Pyto.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR
-      - store_artifacts:
-          path: $CM_BUILD_DIR/Pyto.ipa
+version: 2.0
 
 workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - build
+  ios-build:
+    name: Build iOS App
+    max_build_duration: 60 # Время в минутах
+    environment:
+      xcode: "15.0" # Убедитесь, что используете нужную версию Xcode
+    scripts:
+      - name: Install dependencies
+        script: |
+          gem install cocoapods
+          pod install
+      - name: Decode certificates
+        script: |
+          echo $CERTIFICATE_P12 | base64 --decode > certificate.p12
+          echo $PRIVATE_KEY | base64 --decode > private_key.key
+      - name: Setup Keychain
+        script: |
+          # Создание и настройка Keychain
+          security create-keychain -p "keychain_password" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "keychain_password" build.keychain
+
+          # Импорт сертификата и ключа в Keychain
+          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "certificate_password" -A
+          security import private_key.key -k ~/Library/Keychains/build.keychain -P "private_key_password" -A
+
+          # Настройка Keychain
+          security list-keychains -d user -s ~/Library/Keychains/build.keychain
+          security set-keychain-settings -t 3600 -l ~/Library/Keychains/build.keychain
+      - name: Build iOS App
+        script: |
+          xcodebuild -workspace Pyto.xcworkspace -scheme Pyto -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $CM_BUILD_DIR/Pyto.xcarchive
+          xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/Pyto.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR
+    artifacts:
+      - $CM_BUILD_DIR/Pyto.ipa

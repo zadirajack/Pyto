@@ -1,0 +1,20 @@
+version: 2.0
+workflows:
+  ios-build:
+    name: Build iOS App
+    max_build_duration: 60 # in minutes
+    environment:
+      xcode: "15.0" # укажите нужную версию Xcode
+      vars:
+        MY_ENV_VAR: "some_value" # добавьте необходимые переменные окружения
+    scripts:
+      - name: Install dependencies
+        script: |
+          gem install cocoapods
+          pod install
+      - name: Build iOS App
+        script: |
+          xcodebuild -workspace YourApp.xcworkspace -scheme YourApp -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $CM_BUILD_DIR/YourApp.xcarchive
+          xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/YourApp.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR
+    artifacts:
+      - path: $CM_BUILD_DIR/YourApp.ipa

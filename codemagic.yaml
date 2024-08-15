@@ -4,9 +4,7 @@ workflows:
     name: Build iOS App
     max_build_duration: 60 # in minutes
     environment:
-      xcode: "14.0" # укажите нужную версию Xcode
-      vars:
-        MY_ENV_VAR: "some_value" # добавьте необходимые переменные окружения
+      xcode: "15.0" # обновлено до версии Xcode 15
     scripts:
       - name: Install dependencies
         script: |

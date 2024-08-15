@@ -6,6 +6,10 @@ workflows:
     environment:
       xcode: "15.0" # Убедитесь, что используете нужную версию Xcode
     scripts:
+      - name: Check xcodebuild version
+        script: xcodebuild -version
+      - name: Check CocoaPods version
+        script: pod --version
       - name: Install dependencies
         script: |
           gem install cocoapods
@@ -14,5 +18,7 @@ workflows:
         script: |
           xcodebuild -workspace Pyto.xcworkspace -scheme Pyto -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $CM_BUILD_DIR/Pyto.xcarchive
           xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/Pyto.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR
+      - name: List contents of build directory
+        script: ls -la $CM_BUILD_DIR
     artifacts:
       - $CM_BUILD_DIR/Pyto.ipa

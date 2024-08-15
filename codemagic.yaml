@@ -4,7 +4,7 @@ workflows:
     name: Build iOS App
     max_build_duration: 60 # in minutes
     environment:
-      xcode: "15.0" # обновлено до версии Xcode 15
+      xcode: "15.0" # Убедитесь, что используете нужную версию Xcode
     scripts:
       - name: Install dependencies
         script: |
@@ -12,7 +12,7 @@ workflows:
           pod install
       - name: Build iOS App
         script: |
-          xcodebuild -workspace YourApp.xcworkspace -scheme YourApp -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $CM_BUILD_DIR/YourApp.xcarchive
-          xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/YourApp.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR
+          xcodebuild -workspace Pyto.xcworkspace -scheme Pyto -sdk iphoneos -configuration AppStoreDistribution archive -archivePath $CM_BUILD_DIR/Pyto.xcarchive
+          xcodebuild -exportArchive -archivePath $CM_BUILD_DIR/Pyto.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath $CM_BUILD_DIR
     artifacts:
-      - $CM_BUILD_DIR/YourApp.ipa
+      - $CM_BUILD_DIR/Pyto.ipa
